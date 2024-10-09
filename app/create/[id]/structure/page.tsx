@@ -1,6 +1,8 @@
+import { createCategoryPage } from "@/app/action";
+import { CreationBottomBar } from "@/app/components/CreationBottomBar";
 import { SelectCategory } from "@/app/components/SelectedCategory";
 
-export default function StructureRoute() {
+export default function StructureRoute({ params }: { params: { id: string } }) {
   return (
     <>
       <div className="w-3/5 mx-auto">
@@ -8,8 +10,10 @@ export default function StructureRoute() {
           Which of these best describe your Home?
         </h2>
       </div>
-      <form>
+      <form action={createCategoryPage}>
+        <input type="hidden" name="homeId" value={params.id} />
         <SelectCategory />
+        <CreationBottomBar />
       </form>
     </>
   );
