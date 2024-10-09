@@ -28,5 +28,6 @@ export async function GET() {
     });
   }
 
-  return NextResponse.redirect("http://localhost:3000");
+  return NextResponse.redirect("https://airbnb-clone-seven-rho.vercel.app/");
+  // return NextResponse.redirect("http://localhost:3000");
 }
