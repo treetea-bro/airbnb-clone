@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState, ChangeEvent, KeyboardEvent } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChatBubbleOvalLeftIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { useState, ChangeEvent } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { XMarkIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/solid";
 
 interface Message {
   text: string;
   sender: "user" | "bot";
 }
 
-const Chatbot: React.FC = () => {
+const Chatbot = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
-  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const handleSend = async () => {
     if (input.trim() === "") return;
@@ -21,18 +21,35 @@ const Chatbot: React.FC = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
-    const botResponse = await getBotResponse(input);
+    const botResponse = await getBotResponse();
     const botMessage: Message = { text: botResponse, sender: "bot" };
     setMessages((prev) => [...prev, botMessage]);
   };
 
-  const getBotResponse = async (userInput: string): Promise<string> => {
-    // 실제 API 호출 로직으로 대체하세요.
-    return `챗봇 응답: ${userInput}`;
+  const getBotResponse = async (): Promise<string> => {
+    try {
+      const response = await fetch("/api/getBotResponse", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data.text;
+    } catch (error) {
+      console.error("Error fetching bot response:", error);
+      return "죄송합니다. 응답을 가져올 수 없습니다.";
+    }
   };
 
   return (
-    <div className="fixed right-4 bottom-4 flex flex-col items-end">
+    <div className="fixed right-4 bottom-4 flex flex-col items-end z-50">
       {/* 토글 버튼 */}
       <button
         className="mb-2 p-3 bg-primary text-white rounded-full shadow-lg focus:outline-none"
@@ -76,7 +93,14 @@ const Chatbot: React.FC = () => {
                 </div>
               ))}
             </div>
-            <div className="p-2 border-t flex">
+            {/* 입력 영역 */}
+            <form
+              className="p-2 border-t flex"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+            >
               <input
                 type="text"
                 className="flex-1 border rounded px-2 py-1"
@@ -84,17 +108,14 @@ const Chatbot: React.FC = () => {
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setInput(e.target.value)
                 }
-                onKeyDown={(e: KeyboardEvent<HTMLInputElement>) =>
-                  e.key === "Enter" && handleSend()
-                }
               />
               <button
+                type="submit"
                 className="ml-2 px-4 py-2 bg-primary text-white rounded"
-                onClick={handleSend}
               >
-                보내기
+                SEND
               </button>
-            </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>

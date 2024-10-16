@@ -55,6 +55,13 @@ export default async function HomeRoute({
   const { getUser } = getKindeServerSession();
   const user = await getUser();
 
+  // const c = makeReservation.bind(
+  //   null,
+  //   "레이크랜드 펠스 (Lakeland Fells) 의 전망을 감상할 수 있는 아늑한 엔스위트 룸",
+  //   new Date(2024, 10, 22),
+  //   new Date(2024, 10, 24),
+  // );
+
   return (
     <div className="w-[75%] mx-auto mt-10 mb-12">
       <h2 className="font-medium text-2xl mb-5">{data?.title}</h2>

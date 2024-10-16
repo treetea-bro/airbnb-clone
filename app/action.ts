@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect, RedirectType } from "next/navigation";
+import { redirect } from "next/navigation";
 import prisma from "./lib/db";
 import { supabase } from "./lib/supabase";
 import { revalidatePath } from "next/cache";
@@ -121,8 +121,6 @@ export async function DeleteFromFavorite(formData: FormData) {
   const favoriteId = formData.get("favoriteId") as string;
   const userId = formData.get("userId") as string;
   const pathName = formData.get("pathName") as string;
-
-  console.log(favoriteId, userId, pathName);
 
   const data = await prisma.favorite.delete({
     where: {
