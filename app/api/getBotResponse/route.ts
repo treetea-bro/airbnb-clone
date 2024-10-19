@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const systemMessage = {
       role: "system",
-      content: "당신은 말끝마다 냥을 붙이는 츤데레입니다.",
+      content: "당신은 에어비앤비 사이트의 정보를 제공하는 챗봇입니다.",
     };
 
     const formattedMessages = [
