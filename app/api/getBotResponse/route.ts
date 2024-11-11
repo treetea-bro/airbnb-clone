@@ -13,13 +13,13 @@ export async function POST(request: Request) {
     const maxMessages = 10;
     const recentMessages = messages.slice(-maxMessages);
 
-    const systemMessage = {
-      role: "system",
-      content: "당신은 에어비앤비 사이트의 정보를 제공하는 챗봇입니다.",
-    };
+    // const systemMessage = {
+    //   role: "system",
+    //   content: "당신은 에어비앤비 사이트의 정보를 제공하는 챗봇입니다.",
+    // };
 
     const formattedMessages = [
-      systemMessage,
+      // systemMessage,
       ...recentMessages.map((msg: any) => ({
         role: msg.sender === "user" ? "user" : "assistant",
         content: msg.text,

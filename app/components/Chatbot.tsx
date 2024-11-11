@@ -18,15 +18,17 @@ const Chatbot = () => {
     if (input.trim() === "") return;
 
     const userMessage: Message = { text: input, sender: "user" };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+
+    setMessages(newMessages);
     setInput("");
 
-    const botResponse = await getBotResponse();
+    const botResponse = await getBotResponse(newMessages);
     const botMessage: Message = { text: botResponse, sender: "bot" };
     setMessages((prev) => [...prev, botMessage]);
   };
 
-  const getBotResponse = async (): Promise<string> => {
+  const getBotResponse = async (messages: Message[]): Promise<string> => {
     try {
       const response = await fetch("/api/getBotResponse", {
         method: "POST",
