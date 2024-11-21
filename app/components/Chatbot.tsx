@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { XMarkIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/solid";
+import { gpt } from "../gpt_action";
+import { useRouter } from "next/navigation";
 
 interface Message {
   text: string;
@@ -10,9 +12,21 @@ interface Message {
 }
 
 const Chatbot = () => {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState<string>("");
+  const [currentUrl, setCurrentUrl] = useState("");
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // messages가 변경될 때마다 스크롤을 맨 아래로 이동
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const handleSend = async () => {
     if (input.trim() === "") return;
@@ -30,19 +44,12 @@ const Chatbot = () => {
 
   const getBotResponse = async (messages: Message[]): Promise<string> => {
     try {
-      const response = await fetch("/api/getBotResponse", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messages }),
-      });
+      const data = await gpt(messages, window.location.href);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (data.redirectUrl) {
+        router.push(data.redirectUrl);
       }
 
-      const data = await response.json();
       return data.text;
     } catch (error) {
       console.error("Error fetching bot response:", error);
@@ -94,6 +101,8 @@ const Chatbot = () => {
                   </span>
                 </div>
               ))}
+              {/* 스크롤 위치를 위한 더미 div */}
+              <div ref={messagesEndRef} />
             </div>
             {/* 입력 영역 */}
             <form

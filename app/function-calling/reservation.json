@@ -1,0 +1,18 @@
+{
+  "name": "reservation",
+  "description": "when the user wants to reservation room than just do reservation don't ask what rooms is, if user only give yy-mm-dd then add T15:00:00.000Z and minus 1days each.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "startDate": {
+        "type": "string",
+        "description": "rent the room startDate"
+      },
+      "endDate": {
+        "type": "string",
+        "description": "rent the room endDate"
+      }
+    },
+    "required": ["startDate", "endDate"]
+  }
+}

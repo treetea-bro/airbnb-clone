@@ -1,0 +1,8 @@
+{
+  "name": "reservations",
+  "description": "when user wants to see reservation list, then call this function.",
+  "parameters": {
+    "type": "object",
+    "properties": {}
+  }
+}

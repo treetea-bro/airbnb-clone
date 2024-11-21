@@ -1,0 +1,8 @@
+{
+  "name": "my_homes",
+  "description": "when user want to see own's home list, then call this function.",
+  "parameters": {
+    "type": "object",
+    "properties": {}
+  }
+}

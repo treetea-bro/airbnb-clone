@@ -1,0 +1,8 @@
+{
+  "name": "favorites",
+  "description": "when user wants to see favorite home list, then call this function.",
+  "parameters": {
+    "type": "object",
+    "properties": {}
+  }
+}

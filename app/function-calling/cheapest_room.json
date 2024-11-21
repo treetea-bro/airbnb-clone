@@ -1,0 +1,13 @@
+{
+  "name": "cheapest_room",
+  "description": "when the user wants to see cheapest room, than no need any argument just call, but if user want cheapest about some category only, categoryName argument needed.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "categoryName": {
+        "type": "string",
+        "description": "choose the categoryName according to category name list : beach, trending, beachfront, earthhome, luxe, amazingView, design, pool, tiny, historic, countryside, omg, surfing | wow category equal to omg"
+      }
+    }
+  }
+}

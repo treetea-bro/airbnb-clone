@@ -1,0 +1,26 @@
+{
+  "name": "filter_rooms",
+  "description": "when user want filtering mainpage's rooms, then call this function.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "country": {
+        "type": "string",
+        "description": "ISO 3166-1 alpha-2 format"
+      },
+      "guest": {
+        "type": "string",
+        "description": "Location or place of the event"
+      },
+      "room": {
+        "type": "string",
+        "description": "Date of the event in 'YYYY-MM-DD' format"
+      },
+      "bathroom": {
+        "type": "string",
+        "description": "Date of the event in 'YYYY-MM-DD' format"
+      }
+    },
+    "required": ["country", "guest", "room", "bathroom"]
+  }
+}
