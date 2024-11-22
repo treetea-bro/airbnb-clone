@@ -96,7 +96,9 @@ export async function gpt(
             price: "asc",
           },
           take: 1,
-          where: args2 ? { categoryName: args2.categoryName } : undefined,
+          where: {
+            categoryName: { equals: args2.categoryName, mode: "insensitive" },
+          },
         });
         redirectUrl = `/home/${data?.id}`;
       } else if (name == "reservation") {
