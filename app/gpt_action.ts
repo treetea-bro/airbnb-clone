@@ -10,6 +10,7 @@ import cheapest_room_json from "./function-calling/cheapest_room.json";
 import prisma from "./lib/db";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { revalidatePath } from "next/cache";
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -17,51 +18,43 @@ const openai = new OpenAI({
   timeout: 60 * 1000,
 });
 
-interface Message {
-  text: string;
-  sender: "user" | "bot";
-}
+const system_prompt =
+  `You are a helpful personal assistant.\n\n` +
+  `# Tools\n` +
+  `You have the following tools that you can invoke based on the user inquiry.\n` +
+  `- filter_rooms, when the user wants to search for rooms based on given conditions, country parameter format is using ISO 3166-1 alpha-2 string.\n` +
+  `- my_homes, when the user wants to see own's registered home list\n` +
+  `- favorites, when the user wants to see favorite home list\n` +
+  `- reservation, when the user wants to reservation current page's home than from user, get startDate, endDate argument do reservation.\n` +
+  `- reservations, when the user wants to see reservation list\n` +
+  `- cheapest_room, when the user wants to see cheapest room, than no need any argument just call, but if user want cheapest about some category only, categoryName argument needed.\n` +
+  `be sure to guide the user to fill up all required information.\n` +
+  `When you fill up some of the required information yourself, be sure to confirm to user before proceeding.\n` +
+  `Aside from the listed functions above, answer all other inquiries by telling the user that it is out of scope of your ability.\n\n` +
+  `# User\n` +
+  `If my full name is needed, please ask me for my full name.\n\n` +
+  `# Language Support\n` +
+  `Please reply in the language used by the user.\n\n` +
+  `Today is ${new Date().toISOString().split("T")[0]}`;
 
-export async function gpt(msgs: Message[], currentUrl: string) {
+export async function gpt(
+  msgs: ChatCompletionMessageParam[],
+  currentUrl: string,
+) {
   try {
     // 최대 메시지 수 설정
-    const maxMessages = 20;
-    const recentMessages = msgs.slice(-maxMessages);
+    // const maxMessages = 20;
+    // const recentMessages = msgs.slice(-maxMessages);
 
-    const today = new Date();
-    const formattedToday = today.toISOString().split("T");
-
-    const system_prompt =
-      `You are a helpful personal assistant.\n\n` +
-      `# Tools\n` +
-      `You have the following tools that you can invoke based on the user inquiry.\n` +
-      `- filter_rooms, when the user wants to search for rooms based on given conditions, country parameter format is using ISO 3166-1 alpha-2 string.\n` +
-      `- my_homes, when the user wants to see own's registered home list\n` +
-      `- favorites, when the user wants to see favorite home list\n` +
-      `- reservation, when the user wants to reservation current page's home than from user, get startDate, endDate argument do reservation.\n` +
-      `- reservations, when the user wants to see reservation list\n` +
-      `- cheapest_room, when the user wants to see cheapest room, than no need any argument just call, but if user want cheapest about some category only, categoryName argument needed.\n` +
-      `be sure to guide the user to fill up all required information.\n` +
-      `When you fill up some of the required information yourself, be sure to confirm to user before proceeding.\n` +
-      `Aside from the listed functions above, answer all other inquiries by telling the user that it is out of scope of your ability.\n\n` +
-      `# User\n` +
-      `If my full name is needed, please ask me for my full name.\n\n` +
-      `# Language Support\n` +
-      `Please reply in the language used by the user.\n\n` +
-      `Today is ${formattedToday}`;
-
-    const systemMessage = {
-      role: "system",
-      content: system_prompt,
-    };
-
-    const formattedMessages = [
-      systemMessage,
-      ...recentMessages.map((msg: any) => ({
-        role: msg.sender === "user" ? "user" : "assistant",
-        content: msg.text,
-      })),
+    const systemMessage: ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: system_prompt,
+      },
     ];
+
+    const formattedMessages: ChatCompletionMessageParam[] =
+      systemMessage.concat(msgs);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -81,9 +74,12 @@ export async function gpt(msgs: Message[], currentUrl: string) {
     let redirectUrl = "";
     let botResponse = "";
     if ("tool_calls" in completion.choices[0].message) {
-      const name = completion.choices[0].message.tool_calls[0].function.name;
-      const args =
-        completion.choices[0].message.tool_calls[0].function.arguments;
+      const name =
+        completion?.choices?.[0]?.message?.tool_calls?.[0]?.function?.name;
+      const args = completion?.choices?.[0]?.message?.tool_calls?.[0]?.function
+        ?.arguments as string;
+
+      if (!name && !args) throw Error("function calling error!!");
       const args2 = JSON.parse(args);
 
       if (name == "filter_rooms") {

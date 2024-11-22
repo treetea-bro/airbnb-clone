@@ -5,19 +5,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { XMarkIcon, ChatBubbleOvalLeftIcon } from "@heroicons/react/24/solid";
 import { gpt } from "../gpt_action";
 import { useRouter } from "next/navigation";
-
-interface Message {
-  text: string;
-  sender: "user" | "bot";
-}
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 
 const Chatbot = () => {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatCompletionMessageParam[]>([]);
   const [input, setInput] = useState<string>("");
-  const [currentUrl, setCurrentUrl] = useState("");
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -31,18 +26,26 @@ const Chatbot = () => {
   const handleSend = async () => {
     if (input.trim() === "") return;
 
-    const userMessage: Message = { text: input, sender: "user" };
-    const newMessages = [...messages, userMessage];
+    const userMessage: ChatCompletionMessageParam = {
+      content: input,
+      role: "user",
+    };
+    const newMessages = messages.concat(userMessage);
 
     setMessages(newMessages);
     setInput("");
 
     const botResponse = await getBotResponse(newMessages);
-    const botMessage: Message = { text: botResponse, sender: "bot" };
+    const botMessage: ChatCompletionMessageParam = {
+      content: botResponse,
+      role: "assistant",
+    };
     setMessages((prev) => [...prev, botMessage]);
   };
 
-  const getBotResponse = async (messages: Message[]): Promise<string> => {
+  const getBotResponse = async (
+    messages: ChatCompletionMessageParam[],
+  ): Promise<string> => {
     try {
       const data = await gpt(messages, window.location.href);
 
@@ -87,17 +90,18 @@ const Chatbot = () => {
                 <div
                   key={index}
                   className={`mb-2 ${
-                    msg.sender === "user" ? "text-right" : "text-left"
+                    msg.role === "user" ? "text-right" : "text-left"
                   }`}
                 >
                   <span
                     className={`inline-block px-3 py-2 rounded-lg ${
-                      msg.sender === "user"
+                      msg.role === "user"
                         ? "bg-blue-500 text-white"
                         : "bg-gray-200 text-black"
                     }`}
                   >
-                    {msg.text}
+                    {/* {msg.content} */}
+                    {msg.content as string}
                   </span>
                 </div>
               ))}
